@@ -8,7 +8,7 @@ load_dotenv()
 
 app = Flask(__name__)
 
-# Spoonacular API key
+# Spoonacula
 SPOONACULAR = os.getenv("SPOONACULAR_API_KEY")
 
 # Spoonacular API endpoint
