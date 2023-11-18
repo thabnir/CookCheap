@@ -1,6 +1,6 @@
 import json
 from provigo_web_scraping import *
-from instacart_web_scraping import *
+# from instacart_web_scraping import *
 
 json_data = '''
 {
@@ -113,15 +113,20 @@ def get_list_ingredients(json_data):
 def provigo_info(ingredients):
     '''(list of strings) --> dict
     '''
+    options = webdriver.ChromeOptions()
+    options.add_argument("--headless=new")
+    driver = webdriver.Chrome(options=options)
+
     provigo = {}
     for ingredient in ingredients:
-        url = get_url_provigo(ingredient)
-        name, info = get_info_provigo(url)
+        url = get_url_provigo(ingredient, driver)
+        name, info = get_info_provigo(url, driver)
         #If we cannot find a produce, don't include in the dictionary
         if name == -1:
             continue
         provigo.update({name: info})
-    
+
+    driver.quit()
     return provigo
 
 # a = provigo_info(['egg', 'non-fat yogurt', 'baking soda', 'cinnamon', 'raisins', 'banana', 'carrots'])

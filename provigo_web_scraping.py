@@ -8,9 +8,9 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
 import time
 
-options = webdriver.ChromeOptions()
-options.add_argument("--headless=new")
-driver = webdriver.Chrome(options=options)
+# options = webdriver.ChromeOptions()
+# options.add_argument("--headless=new")
+# driver = webdriver.Chrome(options=options)
 
 # url = "https://www.provigo.ca/concombres-anglais/p/20070132001_EA"
 # url = "https://www.provigo.ca/carottes-sac-de-3-lb/p/20600927001_EA"
@@ -40,7 +40,7 @@ def get_url_provigo(name_produce, driver):
 
     link = soup.find("a", class_="product-tile__details__info__name__link")['href']
     link = "https://www.provigo.ca"+link
-    print(link)
+    # print(link)
     return link
 
 def get_info_provigo(url, driver):
@@ -54,7 +54,7 @@ def get_info_provigo(url, driver):
 
     name = soup.find("h1", class_='product-name__item product-name__item--name')
     price = soup.find("span", class_ ='price__value selling-price-list__item__price selling-price-list__item__price--now-price__value')
-    quantity = soup.find("span", class_ = 'price__unit comparison-price-list__item__price__unit')
+    quantity = soup.find("span", class_ = 'product-name__item product-name__item--package-size')
     unit_price = soup.find("span", class_ = "price__value comparison-price-list__item__price__value")
     unit = soup.find("span", class_ = "price__unit comparison-price-list__item__price__unit")
 
@@ -67,28 +67,38 @@ def get_info_provigo(url, driver):
         print("Name not found.")
 
     if price:
-        price_text = price.get_text(strip=True)
+        price_text = price.get_text(strip=True).replace('$', '').replace(',', '.')
+        try:
+            price_text= float(price_text)
+        except ValueError:
+            # Handle the case where the conversion fails (e.g., if the price is '-1' or other non-numeric value)
+            print(price_text)
         #print("Extracted Price:", price_text)
     else:
         price_text = "-1"
         print("Price not found.")
 
     if quantity:
-        quantity_text = quantity.get_text(strip=True)
+        quantity_text = quantity.get_text(strip=True).replace("/ ", "")
         #print("Extracted Quantity:", quantity_text)
     else:
         quantity_text = "-1"
         #print("Quantity not found.")
 
     if unit_price:
-        unit_price_text = unit_price.get_text(strip=True)
+        unit_price_text = unit_price.get_text(strip=True).replace('$', '').replace(',', '.')
+        try:
+            unit_price_text= float(unit_price_text)
+        except ValueError:
+            # Handle the case where the conversion fails (e.g., if the price is '-1' or other non-numeric value)
+            print(unit_price_text)
         # print("Extracted Unit price:", unit_price_text)
     else:
         unit_price_text = "-1"
         print("Unit price not found.")
     
     if unit:
-        unit_text = unit.get_text(strip=True)
+        unit_text = unit.get_text(strip=True).replace("/ ", "")
         # print("Extracted Unit:", unit_text)
     else:
         unit_text = "-1"
@@ -102,9 +112,9 @@ def get_info_provigo(url, driver):
     return name_text, info
 
 ###Use case: Get info for "potato"
-url = get_url_provigo("pork belly", driver)
-a = get_info_provigo(url, driver)
-driver.quit()
+# url = get_url_provigo("pork belly", driver)
+# a = get_info_provigo(url, driver)
+# driver.quit()
 
 #Triage by cheapest to most expensive and then grab cheapest item
 # dropdown = driver.find_element(By.CLASS_NAME, "MuiSvgIcon-root styled-dropdown__selected-item__icon")
