@@ -27,7 +27,7 @@ def get_info(url):
     # Extract the text content
     if name:
         name_text = name.get_text(strip=True)
-        print("Extracted Name:", name_text)
+        # print("Extracted Name:", name_text)
     else:
         name_text = "-1"
         print("Name not found.")
@@ -50,9 +50,8 @@ def get_info(url):
     #TODO: convert price from string to float, figure out quantity business
     #{"Cucumber": {"Price": " 1,99", "Quantity": "1", "url": "cucumber.com"}, "Potato":{"Price": 6, "Quantity": "100g", "url": "potato.com"}}
     info = dict(Price = price_text, Quantity = quantity_text, Url = url)
-    info = {name_text: info}
     print(info)
-    return info
+    return name_text, info
 
 #Write function that can search for a certain produce on provigo website
 def get_url(name_produce):
@@ -67,15 +66,13 @@ def get_url(name_produce):
     WebDriverWait(driver, 10).until(
         EC.presence_of_element_located((By.CLASS_NAME, "product-tile__details__info__name__link"))
     )
-
-    # Find the element you want to wait for (assuming it has a class named 'revealed')
     revealed = driver.find_element(By.CLASS_NAME, 'product-tile__details__info__name__link')
 
     wait = WebDriverWait(driver, timeout=2)
     wait.until(lambda d : revealed.is_displayed())
 
     html = driver.page_source
-    # time.sleep(30) #Keeps browser open
+    # time.sleep(30) #Keeps browser open, debugging purposes
     driver.quit()
 
     soup = BeautifulSoup(html, 'html.parser')
@@ -87,9 +84,26 @@ def get_url(name_produce):
 
 
 ###Use case: Get info for "saumon"
-url = get_url("patate")
-get_info(url)
+# url = get_url("patate")
+# get_info(url)
 
+#Given a list of ingredients needed, output a dictionary with all of their info
+def provigo_info(ingredients):
+    '''(list of strings) --> dict
+    '''
+    provigo = {}
+    for ingredient in ingredients:
+        url = get_url(ingredient)
+        name, info = get_info(url)
+        #If we cannot find a produce, don't include in the dictionary
+        if name == -1:
+            continue
+        provigo.update({name: info})
+    
+    return provigo
+
+a = provigo_info(['egg', 'non-fat yogurt', 'baking soda', 'cinnamon', 'raisins', 'banana', 'carrots'])
+print(a)
 #Triage by cheapest to most expensive and then grab cheapest item
 # dropdown = driver.find_element(By.CLASS_NAME, "MuiSvgIcon-root styled-dropdown__selected-item__icon")
 # dropdown.click
