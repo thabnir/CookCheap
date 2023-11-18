@@ -6,6 +6,24 @@ import os
 import image_recognition
 load_dotenv()
 
+# complex search: query -> title, id
+# Search Recipes by Ingredients (findByIngredients): ingredients -> title, id, ingredients (all), likes
+# Get Recipe Information (ID input): ID -> title, id, ingredients (all)
+
+
+
+# Search recipes
+# https://api.spoonacular.com/recipes/complexSearch
+# query, cuisine, excludeCuisine, diet, intolerances, equipment, includeIngredients, excludeIngredients, type
+# query: offset, number, results (contains title and id), totalResults
+
+# Search recipes by ingredients
+# https://api.spoonacular.com/recipes/findByIngredients
+# id, image, imageType, likes, missedIngredientCount, missedIngredients, title, unusedIngredients, usedIngredientCount, usedIngredients
+# query: ingredients, number, limitLicense, ranking, ignorePantry
+
+
+
 app = Flask(__name__)
 
 # Spoonacular
@@ -40,14 +58,16 @@ def get_recipes():
         response = requests.get(FIND_BY_INGREDIENTS_URL, params=params)
 
         if response.status_code == 200:
+            # 'id', 'title', 'image', 'imageType', 'usedIngredientCount', 'missedIngredientCount',
+            # 'missedIngredients', 'usedIngredients', 'unusedIngredients', 'likes'
             recipes = response.json()
             print(f"recipes: {recipes}")
             return render_template("recipes.html", recipes=recipes)
         else:
             print(f"Error: {response.status_code} - {response.text}")
             return f"Error: {response.status_code} - {response.text}"
-      
-        
+
+
 @app.route("/recipesbyfood", methods=["POST"])
 def get_recipe_by_food():
     if request.method == "POST":
@@ -60,14 +80,12 @@ def get_recipe_by_food():
 
         response = requests.get(SPOONACULAR_COMPLEX_SEARCH, params=params) # get recipes by food
         if response.status_code == 200:
-            recipe_names = response.json()["results"] # id, foodname, image, imageType
-            recipe_ids = list(map(lambda r: r['id'], recipe_names))
-            recipe_ingredients = [requests.get(f"https://api.spoonacular.com/recipes/{ID}/ingredientWidget.json",
+            recipes = response.json()["results"] # id, title, image, imageType
+            print("recipes:", recipes)
+            recipe_ids = list(map(lambda r: r['id'], recipes))
+            recipes_info = [requests.get(f"https://api.spoonacular.com/recipes/{ID}/information",
                                                {"apiKey": SPOONACULAR, "id": ID}).json() for ID in recipe_ids]
-            name_by_ingredients = [{**recipe_id, **recipe_ingredient}
-                                 for (recipe_id, recipe_ingredient) in zip(recipe_names, recipe_ingredients)]
-            print(name_by_ingredients)
-            return render_template("recipesbyfood.html", recipes=name_by_ingredients) # passed arguments MUST be jsons
+            return render_template("recipesbyfood.html", recipes=recipes_info) # passed arguments MUST be jsons
         else:
             print(f"Error: {response.status_code} - {response.text}")
             return f"Error: {response.status_code} - {response.text}"
