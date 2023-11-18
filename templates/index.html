@@ -49,7 +49,14 @@
         <h1 class="text-center">Recipe App</h1>
         <form action="/recipes" method="post">
             <div class="form-group">
-                <label for="food_input">Enter ingredients you like (comma-separated):</label>
+                <label for="ingredients_input">Enter ingredients you like (comma-separated):</label>
+                <input type="text" id="ingredients_input" name="ingredients_input" class="form-control" required>
+            </div>
+            <button type="submit" class="btn btn-primary btn-block">Get Recipes</button>
+        </form>
+        <form action="/recipesbyfood" method="post">
+            <div class="form-group">
+                <label for="food_input">Enter food you like (comma-separated):</label>
                 <input type="text" id="food_input" name="food_input" class="form-control" required>
             </div>
             <button type="submit" class="btn btn-primary btn-block">Get Recipes</button>
