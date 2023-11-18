@@ -4,13 +4,61 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Spoonacular Recipe App</title>
+    <!-- Bootstrap CSS link -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            padding: 20px;
+        }
+
+        h1 {
+            color: #343a40;
+        }
+
+        form {
+            max-width: 400px;
+            margin: auto;
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        label {
+            font-weight: bold;
+            color: #007bff;
+        }
+
+        button {
+            background-color: #007bff;
+            color: #ffffff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
 </head>
 <body>
-    <h1>Spoonacular Recipe App</h1>
-    <form action="/recipes" method="post">
-        <label for="food_input">Enter foods you like (comma-separated):</label>
-        <input type="text" id="food_input" name="food_input" required>
-        <button type="submit">Get Recipes</button>
-    </form>
+    <div class="container">
+        <h1 class="text-center">Recipe App</h1>
+        <form action="/recipes" method="post">
+            <div class="form-group">
+                <label for="food_input">Enter ingredients you like (comma-separated):</label>
+                <input type="text" id="food_input" name="food_input" class="form-control" required>
+            </div>
+            <button type="submit" class="btn btn-primary btn-block">Get Recipes</button>
+        </form>
+    </div>
+
+    <!-- Bootstrap JS and Popper.js are recommended for Bootstrap functionality -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </body>
 </html>

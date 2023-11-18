@@ -4,29 +4,41 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Recipes</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 </head>
 <body>
-    <h2>Recipes</h2>
-    <ul>
-        {% for recipe in recipes %}
-            <li>
-                <h3>{{ recipe.title }}</h3>
-                <img src="{{ recipe.image }}" alt="{{ recipe.title }}" style="max-width: 200px; max-height: 150px;">
-                <p><strong>Used Ingredients:</strong></p>
-                <ul>
-                    {% for used_ingredient in recipe.usedIngredients %}
-                        <li>{{ used_ingredient.amount }} {{ used_ingredient.unit }} {{ used_ingredient.name }}</li>
-                    {% endfor %}
-                </ul>
-                <p><strong>Missed Ingredients:</strong></p>
-                <ul>
-                    {% for missed_ingredient in recipe.missedIngredients %}
-                        <li>{{ missed_ingredient.amount }} {{ missed_ingredient.unit }} {{ missed_ingredient.name }}</li>
-                    {% endfor %}
-                </ul>
-                <p>Likes: {{ recipe.likes }}</p>
-            </li>
-        {% endfor %}
-    </ul>
+    <div class="container mt-3">
+        <h2 class="mb-4">Recipes</h2>
+        <div class="row">
+            {% for recipe in recipes %}
+                <div class="col-md-4 mb-4">
+                    <div class="card">
+                        <img src="{{ recipe.image }}" class="card-img-top" alt="{{ recipe.title }}">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ recipe.title }}</h5>
+                            <p class="card-text"><strong>Ingredients:</strong></p>
+                            <ul class="list-unstyled">
+                                {% for used_ingredient in recipe.usedIngredients %}
+                                    <li>{{ used_ingredient.original }} </li>
+                                {% endfor %}
+                            </ul>
+                            <!-- <p class="card-text"><strong>Missed Ingredients:</strong></p> -->
+                            <ul class="list-unstyled">
+                                {% for missed_ingredient in recipe.missedIngredients %}
+                                    <li>{{ missed_ingredient.original }} </li>
+                                {% endfor %}
+                            </ul>
+                            <p class="card-text">Likes: {{ recipe.likes }}</p>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Bootstrap JS and Popper.js are recommended for Bootstrap functionality -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </body>
 </html>

@@ -2,6 +2,7 @@ from flask import Flask, render_template, request
 import requests
 from dotenv import load_dotenv
 import os
+from fractions import Fraction
 
 load_dotenv()
 
@@ -13,6 +14,19 @@ SPOONACULAR = os.getenv("SPOONACULAR_API_KEY")
 
 # Spoonacular API endpoint
 SPOONACULAR_API_URL = "https://api.spoonacular.com/recipes/findByIngredients"
+
+
+
+def format_number(number):
+    # Convert to Fraction and simplify
+    fraction = Fraction(number).limit_denominator()
+
+    # If the result is a whole number, return it as an integer
+    if fraction.denominator == 1:
+        return str(fraction.numerator)
+    else:
+        # If the result is a fraction, return it in the form "numerator/denominator"
+        return f"{fraction.numerator}/{fraction.denominator}"
 
 
 @app.route("/")
@@ -28,7 +42,7 @@ def get_recipes():
 
         # Call Spoonacular API to get recipes based on user input
         params = {
-            "apiKey": SPOONACULAR, # always required
+            "apiKey": SPOONACULAR,  # always required
             "ingredients": user_input,
         }
 
