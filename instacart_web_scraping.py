@@ -4,38 +4,12 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 import time
 from destroy_popup import destroy_popup
-
-# yogurt: works (e-0)
-# url = "https://www.instacart.ca/store/adonis/products/17874024"
-
-# ground beef: works (e-0)
-# url = "https://www.instacart.ca/store/adonis/products/27953531"
-
-# salmon: works (e-1ls9hv7)
-# url = "https://www.instacart.ca/store/adonis/products/27943011"
-
-# strawberries: works (e-0)
-# url = "https://www.instacart.ca/store/adonis/products/2656121"
-
-# apples: works (e-0)
-# url = "https://www.instacart.ca/store/adonis/products/16614400"
-
-# spaghetti: works (e-1ls9hv7)
-# url = "https://www.instacart.ca/store/adonis/products/25578738"
-
-# rice: works (e-0)
-# url = "https://www.instacart.ca/store/adonis/products/27343516"
-
-# cheese: works (e-0)
-# url = "https://www.instacart.ca/store/adonis/products/27954083"
-
-# butter: works (e-0)
-# url = "https://www.instacart.ca/store/adonis/products/27266134"
+from selenium.webdriver.support.wait import WebDriverWait
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 
 
-# two class names that work: e-0 and e-1ls9hv7
-
-def get_info(url):
+def get_info_instacart(url):
     driver = webdriver.Chrome()
     driver.get(url)
 
@@ -64,7 +38,10 @@ def get_info(url):
     unitprice = soup.find("div", class_ ='e-1og1nqr')
     if unitprice:
         unit = unitprice.get_text(strip=True)
-        unit = unit.split('/')[1]
+        try:
+            unit = unit.split('/')[1]
+        except IndexError:
+            unit = "per unit"
     else:
         unit = 0
 
@@ -98,7 +75,10 @@ def get_info(url):
     
     if unitprice:
         unit_price = unitprice.get_text(strip=True)
-        unit_price = float(unit_price.split('/')[0][1:])
+        try:
+            unit_price = float(unit_price.split('/')[0][1:])
+        except ValueError:
+            unit_price = float(unit_price.split()[0][1:])
         print("Extracted Unit Price:", unit_price)
     else:
         unit_price = "null"
@@ -116,13 +96,62 @@ def get_info(url):
     # quantity_text = "hihi"
     #{"Cucumber": {"Price": " 1,99", "Quantity": "1", "url": "cucumber.com"}, "Potato":{"Price": 6, "Quantity": "100g", "url": "potato.com"}}
     info = dict(Price = price_text, Quantity = quantity_text, UnitPrice = unit_price, Unit = unit, Url = url)
-    info = {name_text: info}
+    # info = {name_text: info}
     print(info)
-    return info
+    return name_text, info
 
-# destroy_popup(url)
-get_info(url)
 
+
+def get_url_instacart(name_produce, store):
+    '''(str, str) --> (str)
+    name_produce: name of food to search
+    store: metro, adonis, costco-canada, super-c, walmart-canada
+    Given the name of a product, output the url of the page containing said product
+    '''
+    search_url = f"https://www.instacart.ca/store/{store}/s?k={name_produce}"
+    driver = webdriver.Chrome()
+    driver.get(search_url)
+
+    # Wait for the page to load (adjust the wait time as needed)
+    WebDriverWait(driver, 10).until(
+        EC.presence_of_element_located((By.CLASS_NAME, "e-1dlf43s"))
+    )
+    revealed = driver.find_element(By.CLASS_NAME, 'e-1dlf43s')
+
+    wait = WebDriverWait(driver, timeout=2)
+    wait.until(lambda d : revealed.is_displayed())
+
+    html = driver.page_source
+    # time.sleep(30) #Keeps browser open, debugging purposes
+    driver.quit()
+
+    soup = BeautifulSoup(html, 'html.parser')
+
+    link = soup.find("a", class_="e-1dlf43s")['href']
+    link = "https://www.instacart.ca"+link
+    print(link)
+    return link
+
+# url = get_url_instacart("pineapple", "adonis")
+# get_info_instacart(url)
+
+
+def instacart_info(ingredients, store):
+    '''(list of strings) --> dict
+    '''
+    instacart = {}
+    for ingredient in ingredients:
+        url = get_url_instacart(ingredient, store)
+        name, info = get_info_instacart(url)
+        #If we cannot find a produce, don't include in the dictionary
+        if name == -1:
+            continue
+        instacart.update({name: info})
+    
+    return instacart
+
+# a = instacart_info(['egg', 'non-fat yogurt', 'baking soda', 'cinnamon', 'raisins', 'banana', 'carrots'], "adonis")
+# print(a)
 
 # #Put soup into a txt file, good for debugging hehe
 # html = soup.prettify()  #soup is your BeautifulSoup object
