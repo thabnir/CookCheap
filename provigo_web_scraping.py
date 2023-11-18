@@ -7,16 +7,21 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 import time
 
+chrome_options = webdriver.ChromeOptions()
+chrome_options.add_argument("--headless")
+driver = webdriver.Chrome(options=chrome_options)
+
 # url = "https://www.provigo.ca/concombres-anglais/p/20070132001_EA"
 # url = "https://www.provigo.ca/carottes-sac-de-3-lb/p/20600927001_EA"
 
-def get_info(url):
-    driver = webdriver.Chrome()
+
+
+def get_info(url, driver):
+    # driver = webdriver.Chrome()
     driver.get(url)
 
     time.sleep(5)
     html = driver.page_source
-    driver.quit()
 
     soup = BeautifulSoup(html, 'html.parser')
 
@@ -47,19 +52,19 @@ def get_info(url):
         #print("Quantity not found.")
 
     #print("Url: ", url)
-    #TODO: convert price from string to float, figure out quantity business
+
     #{"Cucumber": {"Price": " 1,99", "Quantity": "1", "url": "cucumber.com"}, "Potato":{"Price": 6, "Quantity": "100g", "url": "potato.com"}}
     info = dict(Price = price_text, Quantity = quantity_text, Url = url)
     print(info)
     return name_text, info
 
 #Write function that can search for a certain produce on provigo website
-def get_url(name_produce):
+def get_url(name_produce, driver):
     '''(str) --> (str)
     Given the name of a product, output the url of the page containing said product
     '''
     search_url = f"https://www.provigo.ca/search?search-bar={name_produce}"
-    driver = webdriver.Chrome()
+    # driver = webdriver.Chrome()
     driver.get(search_url)
 
     # Wait for the page to load (adjust the wait time as needed)
@@ -104,6 +109,9 @@ def provigo_info(ingredients):
 
 a = provigo_info(['egg', 'non-fat yogurt', 'baking soda', 'cinnamon', 'raisins', 'banana', 'carrots'])
 print(a)
+
+
+driver.quit()
 #Triage by cheapest to most expensive and then grab cheapest item
 # dropdown = driver.find_element(By.CLASS_NAME, "MuiSvgIcon-root styled-dropdown__selected-item__icon")
 # dropdown.click
