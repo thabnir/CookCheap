@@ -9,7 +9,23 @@
     <h2>Recipes</h2>
     <ul>
         {% for recipe in recipes %}
-            <li>{{ recipe.title }}</li>
+            <li>
+                <h3>{{ recipe.title }}</h3>
+                <img src="{{ recipe.image }}" alt="{{ recipe.title }}" style="max-width: 200px; max-height: 150px;">
+                <p><strong>Used Ingredients:</strong></p>
+                <ul>
+                    {% for used_ingredient in recipe.usedIngredients %}
+                        <li>{{ used_ingredient.amount }} {{ used_ingredient.unit }} {{ used_ingredient.name }}</li>
+                    {% endfor %}
+                </ul>
+                <p><strong>Missed Ingredients:</strong></p>
+                <ul>
+                    {% for missed_ingredient in recipe.missedIngredients %}
+                        <li>{{ missed_ingredient.amount }} {{ missed_ingredient.unit }} {{ missed_ingredient.name }}</li>
+                    {% endfor %}
+                </ul>
+                <p>Likes: {{ recipe.likes }}</p>
+            </li>
         {% endfor %}
     </ul>
 </body>
