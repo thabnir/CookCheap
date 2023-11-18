@@ -1,11 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Spoonacular Recipe App</title>
     <!-- Bootstrap CSS link -->
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" />
     <style>
         body {
             background-color: #f8f9fa;
@@ -44,15 +45,29 @@
         }
     </style>
 </head>
+
 <body>
     <div class="container">
         <h1 class="text-center">Recipe App</h1>
         <form action="/recipes" method="post">
             <div class="form-group">
                 <label for="food_input">Enter ingredients you like (comma-separated):</label>
-                <input type="text" id="food_input" name="food_input" class="form-control" required>
+                <input type="text" id="food_input" name="food_input" class="form-control" required />
             </div>
-            <button type="submit" class="btn btn-primary btn-block">Get Recipes</button>
+            <button type="submit" class="btn btn-primary btn-block">
+                Get Recipes
+            </button>
+        </form>
+    </div>
+
+    <div class="container mt-5">
+        <h1 class="mb-4">Food Image Upload</h1>
+        <form action="/upload" method="post" enctype="multipart/form-data">
+            <div class="form-group">
+                <label for="file">Upload a picture of your food:</label>
+                <input type="file" name="file" class="form-control-file" id="file" accept=".png, .jpg, .jpeg" />
+            </div>
+            <button type="submit" class="btn btn-primary">Submit</button>
         </form>
     </div>
 
@@ -61,4 +76,5 @@
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </body>
+
 </html>
