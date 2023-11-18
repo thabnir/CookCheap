@@ -1,45 +1,102 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Image Recognition Results</title>
-    <!-- Add Bootstrap CDN link -->
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Recipe Cards</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+    }
+    .card-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+        justify-content: start;
+    }
+    .card {
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 10px;
+        width: 200px;
+        cursor: pointer;
+        transition: transform 0.2s;
+        box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
+    }
+    .card:hover {
+        transform: scale(1.05);
+    }
+    .subclasses {
+        margin-top: 10px;
+    }
+    .subclass-item {
+        background-color: #f0f0f0;
+        border-radius: 4px;
+        padding: 5px;
+        margin-top: 5px;
+        cursor: pointer;
+    }
+    .subclass-item:hover {
+        background-color: #e0e0e0;
+    }
+</style>
 </head>
-
 <body>
-    <div class="container mt-5">
-        <h1 class="mb-4">Image Recognition Results</h1>
-        
-        <form action="/submit_selection" method="post">
-            {% for response in dishes %}
-                <div class="mb-3 border p-3">
-                    <h5>{{ response['name'] }} - Probability: {{ response['prob'] }}</h5>
-                    {% if response['subclasses'] %}
-                        <ul>
-                            {% for subclass in response['subclasses'] %}
-                                <li>{{ subclass['name'] }} - Probability: {{ subclass['prob'] }}</li>
-                            {% endfor %}
-                        </ul>
-                    {% endif %}
-                    
-                    <label>
-                        <input type="radio" name="selected_dish" value="{{ loop.index0 }}" required>
-                        Select this dish
-                    </label>
-                </div>
-            {% endfor %}
-            
-            <button type="submit" class="btn btn-primary">Submit</button>
-        </form>
-    </div>
 
-    <!-- Add Bootstrap JS and Popper.js CDN links (if needed) -->
-    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
-    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<div class="card-container" id="recipe-cards"></div>
+
+<script>
+// Parse the given JSON data and use it to create recipe cards
+const data = {{ dishes|tojson|safe }};
+
+function postRecipeName(recipeName) {
+    fetch('get_recipes', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ recipe_name: recipeName })
+    })
+    .then(response => response.json())
+    .then(data => console.log(data))
+    .catch(error => console.error('Error:', error));
+}
+
+function createCard(recipe) {
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.textContent = recipe.name;
+    card.onclick = () => postRecipeName(recipe.name);
+
+    if (recipe.subclasses.length > 0) {
+        const subclassContainer = document.createElement('div');
+        subclassContainer.className = 'subclasses';
+        recipe.subclasses.forEach(subclass => {
+            const subclassElement = document.createElement('div');
+            subclassElement.className = 'subclass-item';
+            subclassElement.textContent = subclass.name;
+            subclassElement.onclick = (event) => {
+                event.stopPropagation(); // Prevent trigger of the parent card click
+                postRecipeName(subclass.name);
+            };
+            subclassContainer.appendChild(subclassElement);
+        });
+        card.appendChild(subclassContainer);
+    }
+    
+    return card;
+}
+
+function renderRecipeCards() {
+    const container = document.getElementById('recipe-cards');
+    data[0].recognition_results.forEach(recipe => {
+        container.appendChild(createCard(recipe));
+    });
+}
+
+renderRecipeCards();
+</script>
+
 </body>
-
 </html>

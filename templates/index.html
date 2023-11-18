@@ -49,12 +49,14 @@
 <body>
     <div class="container">
         <h1 class="text-center">Recipe App</h1>
-        <form action="/recipes" method="post">
+        <form id="recipeForm" method="post">
             <div class="form-group">
-                <label for="ingredients_input">Enter ingredients you like (comma-separated):</label>
-                <input type="text" id="ingredients_input" name="ingredients_input" class="form-control" required />
+                <label for="ingredient_input">Enter ingredients you like (comma-separated):</label>
+                <input type="text" id="ingredient_input" name="ingredient_input" class="form-control" required
+                    onkeydown="checkEnter(event)" />
+
             </div>
-            <button type="submit" class="btn btn-primary btn-block">
+            <button type="button" onclick="submitForm()" class="btn btn-primary btn-block">
                 Get Recipes
             </button>
         </form>
@@ -84,6 +86,34 @@
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+        function submitForm() {
+            // Get user input from the form
+            var userInput = document.getElementById('ingredient_input').value;
+
+            // Construct the dynamic URL
+            var dynamicURL = '/recipes/' + encodeURIComponent(userInput);
+            console.log(dynamicURL);
+
+            // Set the form action to the dynamic URL
+            document.getElementById('recipeForm').action = dynamicURL;
+
+            // Submit the form
+            document.getElementById('recipeForm').submit();
+        }
+        function checkEnter(event) {
+            // Check if the pressed key is Enter (key code 13)
+            if (event.keyCode === 13) {
+                // Prevent the default form submission behavior
+                event.preventDefault();
+
+                // Call the submitForm function
+                submitForm();
+            }
+        }
+
+    </script>
+
 </body>
 
 </html>
