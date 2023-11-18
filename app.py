@@ -1,11 +1,11 @@
 from flask import Flask, render_template, request
+from flask_caching import Cache
 import requests
 from dotenv import load_dotenv
 import os
-from fractions import Fraction
+import image_recognition
 
 load_dotenv()
-
 
 app = Flask(__name__)
 
@@ -13,28 +13,20 @@ app = Flask(__name__)
 SPOONACULAR = os.getenv("SPOONACULAR_API_KEY")
 
 # Spoonacular API endpoint
-SPOONACULAR_API_URL = "https://api.spoonacular.com/recipes/findByIngredients"
+FIND_BY_INGREDIENTS_URL = "https://api.spoonacular.com/recipes/findByIngredients"
 
 
-
-def format_number(number):
-    # Convert to Fraction and simplify
-    fraction = Fraction(number).limit_denominator()
-
-    # If the result is a whole number, return it as an integer
-    if fraction.denominator == 1:
-        return str(fraction.numerator)
-    else:
-        # If the result is a fraction, return it in the form "numerator/denominator"
-        return f"{fraction.numerator}/{fraction.denominator}"
+cache = Cache(app, config={"CACHE_TYPE": "simple"})
 
 
 @app.route("/")
 def index():
     return render_template("index.html")
 
+# use the max ready time because people wanna know how long it takes to cook shit
 
 @app.route("/recipes", methods=["POST"])
+@cache.cached(timeout=7200)
 def get_recipes():
     if request.method == "POST":
         user_input = request.form["food_input"]
@@ -46,7 +38,93 @@ def get_recipes():
             "ingredients": user_input,
         }
 
-        response = requests.get(SPOONACULAR_API_URL, params=params)
+        response = requests.get(FIND_BY_INGREDIENTS_URL, params=params)
+
+        if response.status_code == 200:
+            recipes = response.json()
+            print(f"recipes: {recipes}")
+            return render_template("recipes.html", recipes=recipes)
+        else:
+            print(f"Error: {response.status_code} - {response.text}")
+            return f"Error: {response.status_code} - {response.text}"
+
+
+@app.route("/upload", methods=["POST"])
+@cache.cached(timeout=(3600 * 12)) #1hr * 12 # TODO: update before deployment
+def upload():
+    # get the uploaded file
+    file = request.files["file"]
+
+
+    if file.filename != "":
+        filepath = f"./data/uploads/{file.filename}"
+        os.makedirs("./data/uploads", exist_ok=True)
+        print(f"Saving file to `{filepath}`")
+        file.save(filepath)
+
+        cache_key = f'process_image_{file.filename}'
+
+        if cache.has(cache_key):
+            print(f"Result for {file.filename} served from cache.")
+            response = cache.get(cache_key)
+        else:
+            print(f"Computing result for {file.filename} and storing it in the cache.")
+            
+            # Your existing code to process the image
+            response = image_recognition.process_and_caption(filepath)
+            if response is None:
+                return "Error: No response from image_recognition.process_and_caption"
+            elif "segmentation_results" not in response:
+                return "Error: No segmentation_results in response from image_recognition.process_and_caption"
+            seg_results = response["segmentation_results"] # type: ignore
+        
+            unique_responses = []
+        
+            for item in seg_results:
+                recognition_results = item["recognition_results"]
+                if recognition_results:
+                    max_prob_response = max(recognition_results, key=lambda x: x['prob'])
+                    unique_responses.append(max_prob_response)
+
+            # Store the result in the cache
+            cache.set(cache_key, unique_responses, timeout=3600)  # Cache timeout is in seconds (1 hour in this example)
+
+        # response = image_recognition.process_and_caption(filepath)
+        # response contains a list of items which each have their own "recognition_results" key
+        seg_results = response["segmentation_results"] # type: ignore
+
+        unique_responses = []
+
+        for item in seg_results:
+            recognition_results = item["recognition_results"] # type: ignore
+            if recognition_results:
+                max_prob_response = max(recognition_results, key=lambda x: x["prob"]) # type: ignore
+                unique_responses.append(max_prob_response)
+
+        print("unique_responses:")
+        for response in unique_responses:
+            print(response)
+        print("end unique_responses")
+
+        return render_template("predict.html", dishes=unique_responses)
+    else:
+        return "Error: No file selected"
+
+
+@app.route("/submit_selection", methods=["POST"])
+def submit_selection():
+    if request.method == "POST":
+        # get the selected dish
+        selected_dish = request.form["selected_dish"]
+        print(f"selected_dish: '{selected_dish}'")
+
+        # Call Spoonacular API to get recipes based on user input
+        params = {
+            "apiKey": SPOONACULAR,  # always required
+            "ingredients": selected_dish,
+        }
+
+        response = requests.get(FIND_BY_INGREDIENTS_URL, params=params)
 
         if response.status_code == 200:
             recipes = response.json()

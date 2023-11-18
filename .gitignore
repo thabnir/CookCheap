@@ -1,3 +1,10 @@
+# Project-specific files
+data/processed_images/*
+data/uploads/*
+.vscode
+
+# mac
+.DS_Store
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
