@@ -3,11 +3,7 @@ from flask_caching import Cache
 import requests
 from dotenv import load_dotenv
 import os
-<<<<<<< HEAD
-=======
 import image_recognition
->>>>>>> 3fab06bffd0206b42f77be3e58fad727e59a9bd1
-
 load_dotenv()
 
 app = Flask(__name__)
@@ -16,41 +12,10 @@ app = Flask(__name__)
 SPOONACULAR = os.getenv("SPOONACULAR_API_KEY")
 
 # Spoonacular API endpoint
-<<<<<<< HEAD
-SPOONACULAR_API_URL = "https://api.spoonacular.com/recipes/findByIngredients"
 SPOONACULAR_COMPLEX_SEARCH = "https://api.spoonacular.com/recipes/complexSearch"
-
-@app.route("/recipesbyfood", methods=["POST"])
-def get_recipe_by_food():
-    if request.method == "POST":
-        user_input = request.form["food_input"]
-=======
 FIND_BY_INGREDIENTS_URL = "https://api.spoonacular.com/recipes/findByIngredients"
->>>>>>> 3fab06bffd0206b42f77be3e58fad727e59a9bd1
-
-        params = {
-            "apiKey": SPOONACULAR, # always required
-            "query": user_input,
-        }
-
-<<<<<<< HEAD
-        response = requests.get(SPOONACULAR_COMPLEX_SEARCH, params=params) # get recipes by food
-        if response.status_code == 200:
-            recipe_names = response.json()["results"] # id, foodname, image, imageType
-            recipe_ids = list(map(lambda r: r['id'], recipe_names))
-            recipe_ingredients = [requests.get(f"https://api.spoonacular.com/recipes/{ID}/ingredientWidget.json",
-                                               {"apiKey": SPOONACULAR, "id": ID}).json() for ID in recipe_ids]
-            name_by_ingredients = [{**recipe_id, **recipe_ingredient}
-                                 for (recipe_id, recipe_ingredient) in zip(recipe_names, recipe_ingredients)]
-            print(name_by_ingredients)
-            return render_template("recipesbyfood.html", recipes=name_by_ingredients) # passed arguments MUST be jsons
-        else:
-            print(f"Error: {response.status_code} - {response.text}")
-            return f"Error: {response.status_code} - {response.text}"
         
-=======
 cache = Cache(app, config={"CACHE_TYPE": "simple"})
->>>>>>> 3fab06bffd0206b42f77be3e58fad727e59a9bd1
 
 
 @app.route("/")
@@ -78,6 +43,31 @@ def get_recipes():
             recipes = response.json()
             print(f"recipes: {recipes}")
             return render_template("recipes.html", recipes=recipes)
+        else:
+            print(f"Error: {response.status_code} - {response.text}")
+            return f"Error: {response.status_code} - {response.text}"
+      
+        
+@app.route("/recipesbyfood", methods=["POST"])
+def get_recipe_by_food():
+    if request.method == "POST":
+        user_input = request.form["food_input"]
+
+        params = {
+            "apiKey": SPOONACULAR, # always required
+            "query": user_input,
+        }
+
+        response = requests.get(SPOONACULAR_COMPLEX_SEARCH, params=params) # get recipes by food
+        if response.status_code == 200:
+            recipe_names = response.json()["results"] # id, foodname, image, imageType
+            recipe_ids = list(map(lambda r: r['id'], recipe_names))
+            recipe_ingredients = [requests.get(f"https://api.spoonacular.com/recipes/{ID}/ingredientWidget.json",
+                                               {"apiKey": SPOONACULAR, "id": ID}).json() for ID in recipe_ids]
+            name_by_ingredients = [{**recipe_id, **recipe_ingredient}
+                                 for (recipe_id, recipe_ingredient) in zip(recipe_names, recipe_ingredients)]
+            print(name_by_ingredients)
+            return render_template("recipesbyfood.html", recipes=name_by_ingredients) # passed arguments MUST be jsons
         else:
             print(f"Error: {response.status_code} - {response.text}")
             return f"Error: {response.status_code} - {response.text}"
