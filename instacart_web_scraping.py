@@ -142,3 +142,5 @@ def instacart_info(ingredients, store):
         instacart.update({name: info})
     
     return instacart
+
+#instacart_info(['cumin', 'coriander', 'oregano', 'paprika'], 'adonis')
