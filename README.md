@@ -29,9 +29,5 @@ Exploring caching underscored our commitment to optimization, enhancing platform
 Our coding journey was a crash course in adaptability, mastering web scraping, and deciphering APIs. Image processing brought new skills in uncovering recipes. Caching taught us optimization for better platform performance, while Git challenges emphasized effective communication. In a nutshell, continuous learning, adaptability, and teamwork define our team's growth.
 
 **What's next for CookCheap**
-
-The next steps could be to implement a dish recommendation system.
-
-**What's next for CookCheap**
 - [ ] Implement a dish recommendation system.
 
