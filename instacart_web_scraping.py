@@ -150,18 +150,4 @@ def instacart_info(ingredients, store):
     
     return instacart
 
-<<<<<<< HEAD
 #instacart_info(['mango', 'pineapple', 'kiwi', 'pesto sauce'], 'metro')
-=======
-# a = instacart_info(['egg', 'non-fat yogurt', 'baking soda', 'cinnamon', 'raisins', 'banana', 'carrots'], "adonis")
-# print(a)
-
-# #Put soup into a txt file, good for debugging hehe
-# html = soup.prettify()  #soup is your BeautifulSoup object
-# with open("out.txt","w") as out:
-#     for i in range(0, len(html)):
-#         try:
-#             out.write(html[i])
-#         except Exception:
-#             1+1
->>>>>>> a0f2d148f04b02779ecc7cf5cad0e4165c91e55d
