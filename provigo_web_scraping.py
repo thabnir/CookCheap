@@ -25,13 +25,17 @@ def get_url_provigo(name_produce, driver):
     driver.get(search_url)
 
     # Wait for the page to load (adjust the wait time as needed)
-    WebDriverWait(driver, 10).until(
-        EC.presence_of_element_located((By.CLASS_NAME, "product-tile__details__info__name__link"))
-    )
-    revealed = driver.find_element(By.CLASS_NAME, 'product-tile__details__info__name__link')
+    try:
+        WebDriverWait(driver, 30).until(
+            EC.presence_of_element_located((By.CLASS_NAME, "product-tile__details__info__name__link"))
+        )
+        revealed = driver.find_element(By.CLASS_NAME, 'product-tile__details__info__name__link')
 
-    wait = WebDriverWait(driver, timeout=2)
-    wait.until(lambda d : revealed.is_displayed())
+        wait = WebDriverWait(driver, timeout=2)
+        wait.until(lambda d : revealed.is_displayed())
+    except:
+        return
+        
 
     html = driver.page_source
     # time.sleep(30) #Keeps browser open, debugging purposes
@@ -63,35 +67,35 @@ def get_info_provigo(url, driver):
         name_text = name.get_text(strip=True)
         # print("Extracted Name:", name_text)
     else:
-        name_text = "-1"
+        name_text = "null"
         print("Name not found.")
 
     if price:
         price_text = price.get_text(strip=True)
         #print("Extracted Price:", price_text)
     else:
-        price_text = "-1"
+        price_text = "null"
         print("Price not found.")
 
     if quantity:
         quantity_text = quantity.get_text(strip=True)
         #print("Extracted Quantity:", quantity_text)
     else:
-        quantity_text = "-1"
+        quantity_text = "null"
         #print("Quantity not found.")
 
     if unit_price:
         unit_price_text = unit_price.get_text(strip=True)
         # print("Extracted Unit price:", unit_price_text)
     else:
-        unit_price_text = "-1"
+        unit_price_text = "null"
         print("Unit price not found.")
     
     if unit:
         unit_text = unit.get_text(strip=True)
         # print("Extracted Unit:", unit_text)
     else:
-        unit_text = "-1"
+        unit_text = "null"
         print("Unit not found.")
 
     #print("Url: ", url)
