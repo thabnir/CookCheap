@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, jsonify, redirect
 from flask_caching import Cache
 import requests
 from dotenv import load_dotenv
@@ -65,6 +65,37 @@ def get_recipes(ingredient):
             recipes = response.json()
             print(f"recipes: {recipes}")
             return render_template("recipes.html", recipes=recipes)
+        else:
+            print(f"Error: {response.status_code} - {response.text}")
+            return f"Error: {response.status_code} - {response.text}"
+
+
+@app.route("/recipesbyimage", methods=["POST"])
+def recipe_for_image_caption():
+    if request.method == "POST":
+        data = request.get_json()
+        user_input = data.get("food_input")
+
+        params = {
+            "apiKey": SPOONACULAR,  # always required
+            "query": user_input,
+        }
+
+        # get recipes by food
+        response = requests.get(SPOONACULAR_COMPLEX_SEARCH, params=params)
+
+        if response.status_code == 200:
+            recipes = response.json()["results"]  # id, title, image, imageType
+            print("recipes:", recipes)
+            recipe_ids = list(map(lambda r: r["id"], recipes))
+            recipes_info = [
+                requests.get(
+                    f"https://api.spoonacular.com/recipes/{ID}/information",
+                    {"apiKey": SPOONACULAR, "id": ID},
+                ).json()
+                for ID in recipe_ids
+            ]
+            return render_template("recipesbyfood.html", recipes=recipes_info)
         else:
             print(f"Error: {response.status_code} - {response.text}")
             return f"Error: {response.status_code} - {response.text}"
