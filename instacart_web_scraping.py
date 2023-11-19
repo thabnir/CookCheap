@@ -143,4 +143,4 @@ def instacart_info(ingredients, store):
     
     return instacart
 
-#instacart_info(['cumin', 'coriander', 'oregano', 'paprika'], 'adonis')
+#instacart_info(['mango', 'pineapple', 'kiwi', 'pesto sauce'], 'metro')
