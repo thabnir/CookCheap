@@ -44,58 +44,40 @@
 </head>
 <body>
 
-<div class="card-container" id="recipe-cards"></div>
+<div class="card-container" id="recipe-cards">
+    {% for recipe in dishes[0].recognition_results %}
+        <div class="card" onclick="postRecipeName('{{ recipe.name }}')">
+            {{ recipe.name }}
+            {% if recipe.subclasses %}
+                <div class="subclasses">
+                    {% for subclass in recipe.subclasses %}
+                        <div class="subclass-item" onclick="postRecipeName('{{ subclass.name }}')">
+                            {{ subclass.name }}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+    {% endfor %}
+</div>
 
 <script>
-// Parse the given JSON data and use it to create recipe cards
-const data = {{ dishes|tojson|safe }};
-
 function postRecipeName(recipeName) {
-    fetch('get_recipes', {
+    fetch('/recipesbyimage', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ recipe_name: recipeName })
+        body: JSON.stringify({ food_input: recipeName })
     })
-    .then(response => response.json())
-    .then(data => console.log(data))
+    .then(response => response.text())
+    .then(html => {
+        document.open();
+        document.write(html);
+        document.close();
+    })
     .catch(error => console.error('Error:', error));
 }
-
-function createCard(recipe) {
-    const card = document.createElement('div');
-    card.className = 'card';
-    card.textContent = recipe.name;
-    card.onclick = () => postRecipeName(recipe.name);
-
-    if (recipe.subclasses.length > 0) {
-        const subclassContainer = document.createElement('div');
-        subclassContainer.className = 'subclasses';
-        recipe.subclasses.forEach(subclass => {
-            const subclassElement = document.createElement('div');
-            subclassElement.className = 'subclass-item';
-            subclassElement.textContent = subclass.name;
-            subclassElement.onclick = (event) => {
-                event.stopPropagation(); // Prevent trigger of the parent card click
-                postRecipeName(subclass.name);
-            };
-            subclassContainer.appendChild(subclassElement);
-        });
-        card.appendChild(subclassContainer);
-    }
-    
-    return card;
-}
-
-function renderRecipeCards() {
-    const container = document.getElementById('recipe-cards');
-    data[0].recognition_results.forEach(recipe => {
-        container.appendChild(createCard(recipe));
-    });
-}
-
-renderRecipeCards();
 </script>
 
 </body>
