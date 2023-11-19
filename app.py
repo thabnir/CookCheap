@@ -4,6 +4,7 @@ import requests
 from dotenv import load_dotenv
 import os
 import image_recognition
+from instacart_web_scraping import *
 
 load_dotenv()
 
@@ -60,6 +61,13 @@ def get_recipes_api(ingredients, user_input):
     if cached_response is not None:
         print(f"\n\n----- Serving response for {ingredients} from cache -----\n\n")
         return cached_response
+
+    # a = get_total_cost_grocery_list_csv(
+    #     ["mango", "pineapple", "kiwi", "pesto sauce", "computer"],
+    #     "adonis.csv",
+    #     "adonis",
+    #     False,
+    # )
 
     params = {
         "apiKey": SPOONACULAR,  # always required
