@@ -1,37 +1,87 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Recipes</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-image: url('/static/background.png');
+            background-size: cover;
+            background-repeat: no-repeat;
+        }
+
+        .card-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: start;
+        }
+
+        .card {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 10px;
+            width: auto;
+            cursor: pointer;
+            transition: transform 0.2s;
+            box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+        }
+
+        .card:hover {
+            transform: scale(1.05);
+        }
+
+        .subclasses {
+            margin-top: 10px;
+        }
+
+        .subclass-item {
+            background-color: #f0f0f0;
+            border-radius: 4px;
+            padding: 5px;
+            margin-top: 5px;
+            cursor: pointer;
+        }
+
+        .subclass-item:hover {
+            background-color: #e0e0e0;
+        }
+    </style>
 </head>
+
 <body>
     <div class="container mt-3">
         <h2 class="mb-4">Recipes</h2>
         <div class="row">
             {% for recipe in recipes %}
-                <div class="col-md-4 mb-4">
-                    <div class="card">
-                        <img src="{{ recipe.image }}" class="card-img-top" alt="{{ recipe.title }}">
-                        <div class="card-body">
-                            <h5 class="card-title">{{ recipe.title }}</h5>
-                            <p class="card-text"><strong>Ingredients:</strong></p>
-                            <ul class="list-unstyled">
-                                {% for ingredient in recipe.extendedIngredients %}
-                                    <li>{{ ingredient.original }}</li>
-                                {% endfor %}
-                            </ul>
-                        </div>
+            <div class="col-md-4 mb-4">
+                <div class="card">
+                    <img src="{{ recipe.image }}" class="card-img-top" alt="{{ recipe.title }}">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ recipe.title }}</h5>
+                        <p class="card-text"><strong>Ingredients:</strong></p>
+                        <ul class="list-unstyled">
+                            {% for ingredient in recipe.extendedIngredients %}
+                            <li>{{ ingredient.original }}</li>
+                            {% endfor %}
+                        </ul>
                     </div>
                 </div>
+            </div>
             {% endfor %}
         </div>
     </div>
+    <a href="https://www.instacart.com/" class="btn btn-success" target="_blank">Go to Instacart</a>
 
     <!-- Bootstrap JS and Popper.js are recommended for Bootstrap functionality -->
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </body>
+
 </html>

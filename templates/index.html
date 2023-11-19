@@ -4,13 +4,25 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Spoonacular Recipe App</title>
+    <title>CookCheap</title>
     <!-- Bootstrap CSS link -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap">
+
     <style>
-        body {
+        .logo {
+            font-family: 'Pacifico', cursive;
+            /* Additional styles for the logo */
+        }
+
+        body { 
             background-color: #f8f9fa;
             padding: 20px;
+            background-image: url('/static/background.png');
+            background-size: cover;
+            background-repeat: no-repeat;
         }
 
         h1 {
@@ -32,7 +44,7 @@
         }
 
         button {
-            background-color: #007bff;
+            background-color: rgb(137, 196, 139);
             color: #ffffff;
             border: none;
             padding: 10px 20px;
@@ -41,44 +53,59 @@
         }
 
         button:hover {
-            background-color: #0056b3;
+            background-color: #00b330;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .container img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 0 auto;
         }
     </style>
 </head>
 
 <body>
     <div class="container">
-        <h1 class="text-center">Recipe App</h1>
+        <!-- <h1 class="text-center">CookCheap</h1> -->
+        <div class="container">
+            <img src="/static/textlogo.png" alt="CookCheap">
+        </div>
         <form id="recipeForm" method="post">
             <div class="form-group">
-                <label for="ingredient_input">Enter ingredients you like (comma-separated):</label>
+                <label for="ingredient_input">Enter your favorite ingredients:</label>
                 <input type="text" id="ingredient_input" name="ingredient_input" class="form-control" required
-                    onkeydown="checkEnter(event)" />
-
+                    onkeydown="checkEnterIngredientForm(event)" />
             </div>
-            <button type="button" onclick="submitForm()" class="btn btn-primary btn-block">
+            <button type="button" onclick="submitIngredientForm()" class="btn btn-primary btn-block">
                 Get Recipes
             </button>
         </form>
-        <form action="/recipesbyfood" method="post">
+
+        <form id="recipeFoodsForm" method="post">
             <div class="form-group">
-                <label for="food_input">Enter food you like (comma-separated):</label>
-                <input type="text" id="food_input" name="food_input" class="form-control" required />
+                <label for="food_input">What dishes have you been craving?</label>
+                <input type="text" id="food_input" name="food_input" class="form-control" required
+                    onkeydown="checkEnterFoodsForm()" />
             </div>
-            <button type="submit" class="btn btn-primary btn-block">
+            <button type="submit" onclick="submitFoodsForm()" class="btn btn-primary btn-block">
                 Get Recipes
             </button>
         </form>
-    </div>
 
-    <div class="container mt-5">
-        <h1 class="mb-4">Food Image Upload</h1>
         <form action="/upload" method="post" enctype="multipart/form-data">
-            <div class="form-group">
-                <label for="file">Upload a picture of your food:</label>
-                <input type="file" name="file" class="form-control-file" id="file" accept=".png, .jpg, .jpeg" />
+            <div class="form-group mb-3">
+                <label for="file" class="form-label">Convert a picture of a restaurant dinner to at-home
+                    recipes:</label>
+                <input type="file" name="file" class="form-control-file" id="file"
+                    accept=".png, .jpg, .jpeg, .heic, .gif" />
             </div>
-            <button type="submit" class="btn btn-primary">Submit</button>
+            <button type="submit" class="btn btn-primary btn-block">Analyze Photo</button>
         </form>
     </div>
 
@@ -87,33 +114,47 @@
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <script>
-        function submitForm() {
+        function submitIngredientForm() {
             // Get user input from the form
-            var userInput = document.getElementById('ingredient_input').value;
+            var userInput = document.getElementById("ingredient_input").value;
 
             // Construct the dynamic URL
-            var dynamicURL = '/recipes/' + encodeURIComponent(userInput);
+            var dynamicURL = "/recipes/" + encodeURIComponent(userInput);
             console.log(dynamicURL);
 
             // Set the form action to the dynamic URL
-            document.getElementById('recipeForm').action = dynamicURL;
+            document.getElementById("recipeForm").action = dynamicURL;
 
             // Submit the form
-            document.getElementById('recipeForm').submit();
+            document.getElementById("recipeForm").submit();
         }
-        function checkEnter(event) {
+
+        function submitFoodsForm() {
+            var userInput = document.getElementById('food_input').value;
+            var dynamicURL = '/recipesbyfood/' + encodeURIComponent(userInput);
+            console.log(dynamicURL);
+            document.getElementById('recipeFoodsForm').action = dynamicURL;
+            ocument.getElementById('recipeFoodsForm').submit();
+        }
+
+        function checkEnterIngredientForm(event) {
             // Check if the pressed key is Enter (key code 13)
             if (event.keyCode === 13) {
                 // Prevent the default form submission behavior
                 event.preventDefault();
 
                 // Call the submitForm function
-                submitForm();
+                submitIngredientForm();
             }
         }
 
+        function checkEnterFoodsForm(event) {
+            if (event.keyCode === 13) {
+                event.preventDefault();
+                submitFoodsForm();
+            }
+        }
     </script>
-
 </body>
 
 </html>

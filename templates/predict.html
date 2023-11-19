@@ -1,84 +1,96 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Recipe Cards</title>
-<style>
-    body {
-        font-family: Arial, sans-serif;
-        margin: 20px;
-    }
-    .card-container {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 20px;
-        justify-content: start;
-    }
-    .card {
-        border: 1px solid #ddd;
-        border-radius: 8px;
-        padding: 10px;
-        width: 200px;
-        cursor: pointer;
-        transition: transform 0.2s;
-        box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
-    }
-    .card:hover {
-        transform: scale(1.05);
-    }
-    .subclasses {
-        margin-top: 10px;
-    }
-    .subclass-item {
-        background-color: #f0f0f0;
-        border-radius: 4px;
-        padding: 5px;
-        margin-top: 5px;
-        cursor: pointer;
-    }
-    .subclass-item:hover {
-        background-color: #e0e0e0;
-    }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recipe Cards</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-image: url('/static/background.png');
+            background-size: cover;
+            background-repeat: no-repeat;
+        }
+
+        .card-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: start;
+        }
+
+        .card {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 10px;
+            width: auto;
+            cursor: pointer;
+            transition: transform 0.2s;
+            box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+        }
+
+        .card:hover {
+            transform: scale(1.05);
+        }
+
+        .subclasses {
+            margin-top: 10px;
+        }
+
+        .subclass-item {
+            background-color: #f0f0f0;
+            border-radius: 4px;
+            padding: 5px;
+            margin-top: 5px;
+            cursor: pointer;
+        }
+
+        .subclass-item:hover {
+            background-color: #e0e0e0;
+        }
+    </style>
 </head>
+
 <body>
 
-<div class="card-container" id="recipe-cards">
-    {% for recipe in dishes[0].recognition_results %}
+    <div class="card-container" id="recipe-cards">
+        {% for recipe in dishes[0].recognition_results %}
         <div class="card" onclick="postRecipeName('{{ recipe.name }}')">
             {{ recipe.name }}
             {% if recipe.subclasses %}
-                <div class="subclasses">
-                    {% for subclass in recipe.subclasses %}
-                        <div class="subclass-item" onclick="postRecipeName('{{ subclass.name }}')">
-                            {{ subclass.name }}
-                        </div>
-                    {% endfor %}
+            <div class="subclasses">
+                {% for subclass in recipe.subclasses %}
+                <div class="subclass-item" onclick="postRecipeName('{{ subclass.name }}')">
+                    {{ subclass.name }}
                 </div>
+                {% endfor %}
+            </div>
             {% endif %}
         </div>
-    {% endfor %}
-</div>
+        {% endfor %}
+    </div>
 
-<script>
-function postRecipeName(recipeName) {
-    fetch('/recipesbyimage', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ food_input: recipeName })
-    })
-    .then(response => response.text())
-    .then(html => {
-        document.open();
-        document.write(html);
-        document.close();
-    })
-    .catch(error => console.error('Error:', error));
-}
-</script>
+    <script>
+        function postRecipeName(recipeName) {
+            fetch('/recipesbyimage', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ food_input: recipeName })
+            })
+                .then(response => response.text())
+                .then(html => {
+                    document.open();
+                    document.write(html);
+                    document.close();
+                })
+                .catch(error => console.error('Error:', error));
+        }
+    </script>
 
 </body>
+
 </html>

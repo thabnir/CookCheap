@@ -25,14 +25,20 @@ load_dotenv()
 
 app = Flask(__name__)
 
+
 # Spoonacular
 SPOONACULAR = os.getenv("SPOONACULAR_API_KEY")
 
 # Spoonacular API endpoint
 SPOONACULAR_COMPLEX_SEARCH = "https://api.spoonacular.com/recipes/complexSearch"
 FIND_BY_INGREDIENTS_URL = "https://api.spoonacular.com/recipes/findByIngredients"
+# "https://api.spoonacular.com/recipes/{id}/analyzedInstructions" # to add
+# https://api.spoonacular.com/recipes/{id}/priceBreakdownWidget.json
 
-cache = Cache(app, config={"CACHE_TYPE": "simple"})
+# Use the "filesystem" cache type with a specified cache directory
+
+cache = Cache(app, config={"CACHE_TYPE": "filesystem", "CACHE_DIR": "./cache"})
+# cache = Cache(app, config={"CACHE_TYPE": "simple"})
 
 
 @app.route("/")
@@ -42,32 +48,109 @@ def index():
 
 # use the max ready time because people wanna know how long it takes to cook shit
 
+# https://spoonacular.com/food-api/docs#Summarize-Recipe
+# add this to every recipe card
+# then expand using some whatever thing that I can think of later
+
+
+# todo: make there be 9 of them
+# cached version for API savings + speediness
+def get_recipes_api(ingredients, user_input):
+    cached_response = cache.get(ingredients)
+    if cached_response is not None:
+        print(f"\n\n----- Serving response for {ingredients} from cache -----\n\n")
+        return cached_response
+
+    params = {
+        "apiKey": SPOONACULAR,  # always required
+        "ingredients": user_input,
+    }
+
+    response = requests.get(FIND_BY_INGREDIENTS_URL, params=params)
+    if response.status_code == 200:
+        # 'id', 'title', 'image', 'imageType', 'usedIngredientCount', 'missedIngredientCount',
+        # 'missedIngredients', 'usedIngredients', 'unusedIngredients', 'likes'
+        recipes = response.json()
+        print(f"Caching recipes for {ingredients}")
+        cache.set(ingredients, recipes)
+        print(recipes)
+        return recipes
+    else:
+        print(f"Error: {response.status_code} - {response.text}")
+        return f"Error: {response.status_code} - {response.text}"
+
 
 @app.route("/recipes/<ingredient>", methods=["POST"])
-@cache.cached(timeout=7200)
 def get_recipes(ingredient):
     print(ingredient)
     if request.method == "POST":
         user_input = request.form["ingredient_input"]
         print(f"user_input: '{user_input}'")
+        recipes = get_recipes_api(ingredient, user_input)
+        return render_template("recipes.html", recipes=recipes)
 
-        # Call Spoonacular API to get recipes based on user input
-        params = {
-            "apiKey": SPOONACULAR,  # always required
-            "ingredients": user_input,
-        }
 
-        response = requests.get(FIND_BY_INGREDIENTS_URL, params=params)
+def recipe_for_image_caption_api(user_input):
+    cached_response = cache.get(user_input)
+    if cached_response is not None:
+        print(f"\n\n----- Serving response for {user_input} from cache -----\n\n")
+        return cached_response
 
-        if response.status_code == 200:
-            # 'id', 'title', 'image', 'imageType', 'usedIngredientCount', 'missedIngredientCount',
-            # 'missedIngredients', 'usedIngredients', 'unusedIngredients', 'likes'
-            recipes = response.json()
-            print(f"recipes: {recipes}")
-            return render_template("recipes.html", recipes=recipes)
-        else:
-            print(f"Error: {response.status_code} - {response.text}")
-            return f"Error: {response.status_code} - {response.text}"
+    print(f"Getting recipes for {user_input} (not cached)")
+    params = {
+        "apiKey": SPOONACULAR,  # always required
+        "query": user_input,  # the one they chose as most likely from among the predictions
+        "addRecipeInformation": "true",
+    }
+    response = requests.get(SPOONACULAR_COMPLEX_SEARCH, params=params)
+
+    if response.status_code == 200:
+        recipes = response.json()
+
+        # also cache the complex search results
+        print(f"Caching recipes for {user_input}")
+        cache.set(user_input, recipes)
+
+        recipes = recipes["results"]  # id, title, image, imageType
+        print("recipes:", recipes)
+        recipe_ids = list(map(lambda r: r["id"], recipes))
+        recipes_info = [get_id_info(ID) for ID in recipe_ids]
+        print(f"Caching recipes_info for {user_input}")
+        cache.set(user_input, recipes_info)
+
+        return recipes_info
+    else:
+        print(f"Error: {response.status_code} - {response.text}")
+        return f"Error: {response.status_code} - {response.text}"
+
+
+def cplx_search_api(user_input):
+    cached_response = cache.get(user_input)
+
+
+def get_id_info(id):
+    # cached_response = cache.get(str(id))
+    cached_response = None
+    print(f"The cache name is {str(id)} which gets saved as `idk`")
+    if cached_response is not None:
+        print(f"\n\n----- Serving response for {str(id)} from cache -----\n\n")
+        return cached_response
+
+    params = {
+        "apiKey": SPOONACULAR,  # always required
+        "id": id,
+    }
+    response = requests.get(
+        f"https://api.spoonacular.com/recipes/{id}/information", params=params
+    )
+    if response.status_code == 200:
+        recipe_info = response.json()
+        print(f"Caching recipe_info for {id}")
+        # cache.set(str(id), recipe_info)
+        return recipe_info
+    else:
+        print(f"Error: {response.status_code} - {response.text}")
+        return f"Error: {response.status_code} - {response.text}"
 
 
 @app.route("/recipesbyimage", methods=["POST"])
@@ -75,46 +158,63 @@ def recipe_for_image_caption():
     if request.method == "POST":
         data = request.get_json()
         user_input = data.get("food_input")
-
-        params = {
-            "apiKey": SPOONACULAR,  # always required
-            "query": user_input,
-        }
+        recipes_info = recipe_for_image_caption_api(user_input)
 
         # get recipes by food
-        response = requests.get(SPOONACULAR_COMPLEX_SEARCH, params=params)
-
-        if response.status_code == 200:
-            recipes = response.json()["results"]  # id, title, image, imageType
-            print("recipes:", recipes)
-            recipe_ids = list(map(lambda r: r["id"], recipes))
-            recipes_info = [
-                requests.get(
-                    f"https://api.spoonacular.com/recipes/{ID}/information",
-                    {"apiKey": SPOONACULAR, "id": ID},
-                ).json()
-                for ID in recipe_ids
-            ]
-            return render_template("recipesbyfood.html", recipes=recipes_info)
-        else:
-            print(f"Error: {response.status_code} - {response.text}")
-            return f"Error: {response.status_code} - {response.text}"
+        return render_template("recipesbyfood.html", recipes=recipes_info)
 
 
-@app.route("/recipesbyfood", methods=["POST"])
-def get_recipe_by_food():
+# TODO: integrate this into the search
+cuisines = [
+    "African",
+    "Asian",
+    "American",
+    "British",
+    "Cajun",
+    "Caribbean",
+    "Chinese",
+    "Eastern European",
+    "European",
+    "French",
+    "German",
+    "Greek",
+    "Indian",
+    "Irish",
+    "Italian",
+    "Japanese",
+    "Jewish",
+    "Korean",
+    "Latin American",
+    "Mediterranean",
+    "Mexican",
+    "Middle Eastern",
+    "Nordic",
+    "Southern",
+    "Spanish",
+    "Thai",
+    "Vietnamese",
+]
+
+
+@app.route("/recipesbyfood/<query>", methods=["POST"])
+@cache.cached()  # TODO: implement persistent caching for the data but not the html
+def get_recipe_by_food(query):
+    print(f"query: `{query}`")
     if request.method == "POST":
         user_input = request.form["food_input"]
 
         params = {
             "apiKey": SPOONACULAR,  # always required
             "query": user_input,
+            "addRecipeInformation": "true",
         }
 
-        response = requests.get(
-            SPOONACULAR_COMPLEX_SEARCH, params=params
-        )  # get recipes by food
+        # get recipes by food
+        response = requests.get(SPOONACULAR_COMPLEX_SEARCH, params=params)
         if response.status_code == 200:
+            print("raw json:")
+            print(response.json())
+            print("raw json:")
             recipes = response.json()["results"]  # id, title, image, imageType
             print("recipes:", recipes)
             recipe_ids = list(map(lambda r: r["id"], recipes))

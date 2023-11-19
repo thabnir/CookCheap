@@ -2,6 +2,7 @@ import os
 import json
 from dotenv import load_dotenv
 from PIL import Image
+from pillow_heif import register_heif_opener  # for that iphone demo
 import requests
 
 load_dotenv()
@@ -40,7 +41,15 @@ def process_image(filepath):
     # Extract file name and extension from the filepath
     file_name, file_extension = os.path.splitext(os.path.basename(filepath))
 
-    with Image.open(filepath) as img:
+    if (
+        file_extension == ".heic"
+        or file_extension == ".HEIC"
+        or file_extension == ".heif"
+        or file_extension == ".HEIF"
+    ):
+        register_heif_opener()  # for that iphone demo
+
+    with Image.open(filepath).convert("RGB") as img:
         # make aspect ratio square by cropping into the center
         small_dim = min(img.width, img.height)
         left = (img.width - small_dim) // 2
@@ -52,13 +61,22 @@ def process_image(filepath):
         img = img.resize((512, 512))  # resize
 
         # check if image size is > 1MB
-        if os.path.getsize(filepath) > 1024 * 1024:
-            # try to reduce filesize
-            img.save(output_dir + f"{file_name}.jpg", quality=85)
-            # if this doesn't work then blame the user
-        else:
-            # save as JPG at /data/processed_images/<name>.jpg
-            img.save(output_dir + f"{file_name}.jpg")
+        quality = 90
+        outpath = output_dir + f"{file_name}.jpg"
+
+        while os.path.getsize(filepath) > 1024 * 1024:
+            # compress image
+            # note: this does it in place, so the uploaded image is overwritten
+            # could be annoying if you want to keep the original
+            # whatever, it's a hackathon
+            print(f"Compressing {filepath}...")
+            img.save(filepath, quality=quality)
+            print(f"New size: {os.path.getsize(filepath)}")
+            quality -= 5
+            print(f"New quality: {quality}")
+
+        img.save(outpath)
+        return outpath
 
 
 def caption_image(filepath):
@@ -68,7 +86,9 @@ def caption_image(filepath):
     cache_key = os.path.basename(filepath)
 
     if cache_key in cache:
-        print(f"\n\n------------------------Result for {filepath} served from cache.------------------------\n\n")
+        print(
+            f"\n\n------------------------Result for {filepath} served from cache.------------------------\n\n"
+        )
         return cache[cache_key]
 
     params = {
@@ -94,6 +114,9 @@ def caption_image(filepath):
         # cache it (don't rate limit me bro)
         cache[cache_key] = dishes
         save_cache(cache)
+        print(
+            f"\n\n------------------------Result for {filepath} saved to cache.------------------------\n\n"
+        )
 
         return dishes
     else:
@@ -107,10 +130,10 @@ def caption_image(filepath):
 # TODO: make version that has "confirm dish" dialog
 def process_and_caption(filepath):
     """Returns a JSON response containing dishes and their associated probabilities."""
-    process_image(filepath)
-    return caption_image(filepath)
+    outpath = process_image(filepath)
+    return caption_image(outpath)
 
 
 if __name__ == "__main__":
-    # process_image("./data/uploads/steak.jpg")
-    process_and_caption("./data/uploads/flan.jpeg")
+    process_image("./data/uploads/steak.jpg")
+    # process_and_caption("./data/uploads/flan.jpeg")
