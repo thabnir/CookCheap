@@ -1,10 +1,5 @@
 # CookCheap
-<img src=”https://github.com/thabnir/grocget/assets/115143411/1817408f-5320-401e-bc39-7361573ff11e" alt=”my banner”>
-<p align=”center”>
-
-<img width=”200" height=”200" src=”https://user-images.githubusercontent.com/75753187/123358567-aac7b900-d539-11eb-8275-0b380264bb4c.png" alt=”my banner”>
-
-</p>
+![Welcome to CookCheap!](https://github.com/thabnir/grocget/assets/115143411/1817408f-5320-401e-bc39-7361573ff11e)
 
 **Inspiration**
 
