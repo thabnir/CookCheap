@@ -4,6 +4,8 @@ import requests
 from dotenv import load_dotenv
 import os
 import image_recognition
+import instacart_web_scraping
+import random
 from instacart_web_scraping import *
 
 load_dotenv()
@@ -54,20 +56,13 @@ def index():
 # then expand using some whatever thing that I can think of later
 
 
-# todo: make there be 9 of them
+# todo: make there be 9 of them so that it lines up better with the ui (3 cols per row)
 # cached version for API savings + speediness
 def get_recipes_api(ingredients, user_input):
-    cached_response = cache.get(ingredients)
-    if cached_response is not None:
-        print(f"\n\n----- Serving response for {ingredients} from cache -----\n\n")
-        return cached_response
-
-    # a = get_total_cost_grocery_list_csv(
-    #     ["mango", "pineapple", "kiwi", "pesto sauce", "computer"],
-    #     "adonis.csv",
-    #     "adonis",
-    #     False,
-    # )
+    # cached_response = cache.get(ingredients)
+    # if cached_response is not None:
+    #     print(f"\n\n----- Serving response for {ingredients} from cache -----\n\n")
+    #     return cached_response
 
     params = {
         "apiKey": SPOONACULAR,  # always required
@@ -80,8 +75,27 @@ def get_recipes_api(ingredients, user_input):
         # 'missedIngredients', 'usedIngredients', 'unusedIngredients', 'likes'
         recipes = response.json()
         print(f"Caching recipes for {ingredients}")
-        cache.set(ingredients, recipes)
         print(recipes)
+        # missedIngredients and UsedIngredients combine to make recipeIngredients
+        for recipe in recipes:
+            recipe_ingredients = recipe["missedIngredients"] + recipe["usedIngredients"]
+            for recipe_ingredient in recipe_ingredients:
+                print(f"recipe_ingredient: `{recipe_ingredient}`")
+            # convert to a list of actual ingredient names
+            # by lambda ["name"]
+            ingredient_names = list(map(lambda r: r["name"], recipe_ingredients))
+            print(f"ingredient_names: `{ingredient_names}`")
+            tc_adonis = instacart_web_scraping.get_total_cost_grocery_list_csv(
+                ingredient_names, "adonis.csv", "adonis", False
+            )
+            tc_metro = instacart_web_scraping.get_total_cost_grocery_list_csv(
+                ingredient_names, "metro.csv", "metro", False
+            )
+            print(f"Prices:\nAdonis: {tc_adonis}\nMetro: {tc_metro}")
+            recipe["tc_adonis"] = tc_adonis
+            recipe["tc_metro"] = tc_metro
+
+        cache.set(ingredients, recipes)
         return recipes
     else:
         print(f"Error: {response.status_code} - {response.text}")
@@ -99,16 +113,16 @@ def get_recipes(ingredient):
 
 
 def recipe_for_image_caption_api(user_input):
-    cached_response = cache.get(user_input)
-    if cached_response is not None:
-        print(f"\n\n----- Serving response for {user_input} from cache -----\n\n")
-        return cached_response
+    # cached_response = cache.get(user_input)
+    # if cached_response is not None:
+    #     print(f"\n\n----- Serving response for {user_input} from cache -----\n\n")
+    #     return cached_response
 
     print(f"Getting recipes for {user_input} (not cached)")
     params = {
         "apiKey": SPOONACULAR,  # always required
         "query": user_input,  # the one they chose as most likely from among the predictions
-        "addRecipeInformation": "true",
+        # "addRecipeInformation": "true",
     }
     response = requests.get(SPOONACULAR_COMPLEX_SEARCH, params=params)
 
@@ -123,6 +137,32 @@ def recipe_for_image_caption_api(user_input):
         print("recipes:", recipes)
         recipe_ids = list(map(lambda r: r["id"], recipes))
         recipes_info = [get_id_info(ID) for ID in recipe_ids]
+
+        
+        for recipe in recipes:
+            try:
+                print(f"FLAG--recipe: {recipe}")
+                recipe_ingredients = recipe["missedIngredients"] + recipe["usedIngredients"]
+                for recipe_ingredient in recipe_ingredients:
+                    print(f"recipe_ingredient: `{recipe_ingredient}`")
+                # convert to a list of actual ingredient names
+                # by lambda ["name"]
+                ingredient_names = list(map(lambda r: r["name"], recipe_ingredients))
+                print(f"ingredient_names: `{ingredient_names}`")
+                tc_adonis = instacart_web_scraping.get_total_cost_grocery_list_csv(
+                    ingredient_names, "adonis.csv", "adonis", False
+                )
+                tc_metro = instacart_web_scraping.get_total_cost_grocery_list_csv(
+                    ingredient_names, "metro.csv", "metro", False
+                )
+                print(f"Prices:\nAdonis: {tc_adonis}\nMetro: {tc_metro}")
+                recipe["tc_adonis"] = tc_adonis
+                recipe["tc_metro"] = tc_metro       
+            except:
+                print("Error: Could not get price for recipe")
+                recipe["tc_adonis"] = 0
+                recipe["tc_metro"] = 0
+
         print(f"Caching recipes_info for {user_input}")
         cache.set(user_input, recipes_info)
 
@@ -233,6 +273,31 @@ def get_recipe_by_food(query):
                 ).json()
                 for ID in recipe_ids
             ]
+
+            for recipe in recipes:
+                try:
+                    print(f"FLAG--recipe: {recipe}")
+                    recipe_ingredients = recipe["extendedIngredients"]
+                    for recipe_ingredient in recipe_ingredients:
+                        print(f"recipe_ingredient: `{recipe_ingredient}`")
+                    # convert to a list of actual ingredient names
+                    # by lambda ["name"]
+                    ingredient_names = list(map(lambda r: r["name"], recipe_ingredients))
+                    print(f"ingredient_names: `{ingredient_names}`")
+                    tc_adonis = instacart_web_scraping.get_total_cost_grocery_list_csv(
+                        ingredient_names, "adonis.csv", "adonis", False
+                    )
+                    tc_metro = instacart_web_scraping.get_total_cost_grocery_list_csv(
+                        ingredient_names, "metro.csv", "metro", False
+                    )
+                    print(f"Prices:\nAdonis: {tc_adonis}\nMetro: {tc_metro}")
+                    recipe["tc_adonis"] = tc_adonis
+                    recipe["tc_metro"] = tc_metro
+                except:
+                    print("Error: Could not get price for recipe")
+                    recipe["tc_adonis"] = 0
+                    recipe["tc_metro"] = 0
+
             return render_template(
                 "recipesbyfood.html", recipes=recipes_info
             )  # passed arguments MUST be jsons

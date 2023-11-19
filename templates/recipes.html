@@ -53,12 +53,17 @@
         .subclass-item:hover {
             background-color: #e0e0e0;
         }
+        
+        .h1 {
+            color: #ffff;
+            text-align: center;
+        }
     </style>
 </head>
 
 <body>
     <div class="container mt-3">
-        <h2 class="mb-4">Recipes</h2>
+        <h1 class="mb-4">Recipes</h1>
         <div class="row">
             {% for recipe in recipes %}
             <div class="col-md-4 mb-4">
@@ -67,7 +72,7 @@
                     <div class="card-body">
                         <h5 class="card-title">{{ recipe.title }}</h5>
                         <p class="card-text"><strong>Ingredients:</strong></p>
-                        <ul class="list-unstyled">
+                        <ul class="list">
                             {% for used_ingredient in recipe.usedIngredients %}
                             <li>{{ used_ingredient.original }} </li>
                             {% endfor %}
@@ -77,16 +82,12 @@
                             <li>{{ missed_ingredient.original }} </li>
                             {% endfor %}
                         </ul>
+                        <ul id="priceCompare" class="list-unstyled">
+                            <li>Cost at Adonis: ${{ recipe.tc_adonis }}</li>
+                            <li>Cost at Metro: ${{ recipe.tc_metro }}</li>
+                        </ul>
                         <p class="card-text">Likes: {{ recipe.likes }}</p>
 
-                        <div id="priceChart">
-                            <!-- Display the image here -->
-                            {% if recipe.price_chart %}
-                            <img src="{{ recipe.price_chart }}" alt="Price Chart">
-                            {% else %}
-                            <p>{{ recipe.price_chart }}</p>
-                            {% endif %}
-                        </div>
 
                     </div>
                 </div>
