@@ -42,7 +42,7 @@ ing37 = ['chocolate', 'candy', 'frozen pizza', 'banana']
 
 
 #Give big list of common ingredients to provigo_info
-data = instacart_info(ing18, "adonis")
+data = instacart_info(ing7, "metro")
 
 def make_csv(store_name, data):
     csv_file = store_name+'.csv'
@@ -75,7 +75,7 @@ def append_to_csv(store_name, additional_data):
     print(f'Data appended to CSV file "{csv_file}" successfully.')
     
 
-# make_csv("adonis", data)
-append_to_csv("adonis", data)
+#make_csv("metro", data)
+append_to_csv("metro", data)
 
 
