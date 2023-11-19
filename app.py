@@ -68,6 +68,17 @@ def get_recipes():
             return f"Error: {response.status_code} - {response.text}"
 
 
+def remove_duplicate_ingredients(ingredients):
+    unique_values = set()
+    result_list = []
+    for d in ingredients:
+        value = d["original"]
+        if value not in unique_values:
+            unique_values.add(value)
+            result_list.append(d)
+    return result_list
+
+
 @app.route("/recipesbyfood", methods=["POST"])
 def get_recipe_by_food():
     if request.method == "POST":
@@ -81,10 +92,12 @@ def get_recipe_by_food():
         response = requests.get(SPOONACULAR_COMPLEX_SEARCH, params=params) # get recipes by food
         if response.status_code == 200:
             recipes = response.json()["results"] # id, title, image, imageType
-            print("recipes:", recipes)
             recipe_ids = list(map(lambda r: r['id'], recipes))
             recipes_info = [requests.get(f"https://api.spoonacular.com/recipes/{ID}/information",
                                                {"apiKey": SPOONACULAR, "id": ID}).json() for ID in recipe_ids]
+            print("recipes info:", recipes_info[0:2])
+            for i in range(len(recipes_info)):
+                recipes_info[i]["extendedIngredients"] = remove_duplicate_ingredients(recipes_info[i]["extendedIngredients"])
             return render_template("recipesbyfood.html", recipes=recipes_info) # passed arguments MUST be jsons
         else:
             print(f"Error: {response.status_code} - {response.text}")
