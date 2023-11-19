@@ -32,5 +32,5 @@ Using real-time data is not as complicated as we may have imagined.
 
 **What's next for CookCheap**
 
-The next steps could be to implement a dish recommendation system.
+- [ ] Implement a dish recommendation system.
 
