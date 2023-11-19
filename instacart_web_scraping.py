@@ -7,6 +7,8 @@ from destroy_popup import destroy_popup
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from csv import writer
+import os
 
 
 def get_info_instacart(url):
@@ -20,8 +22,7 @@ def get_info_instacart(url):
     soup = BeautifulSoup(html, 'html.parser')
 
     name = soup.find("span", class_='e-17kpahp') 
-
-    # price = soup.find("span", class_ ='e-0')
+    
     price = soup.find("span", class_ ='e-1ls9hv7')
     if not price:
         price = soup.find("span", class_ ='e-0')
@@ -55,8 +56,6 @@ def get_info_instacart(url):
 
     if price:
         price_text = price.get_text(strip=True)
-        # convert from string to float
-        # clean
         try:
             price_text = float(price_text.split('/')[0][1:])
         except ValueError:
@@ -93,10 +92,7 @@ def get_info_instacart(url):
 
     print("Url: ", url)
 
-    # quantity_text = "hihi"
-    #{"Cucumber": {"Price": " 1,99", "Quantity": "1", "url": "cucumber.com"}, "Potato":{"Price": 6, "Quantity": "100g", "url": "potato.com"}}
     info = dict(Price = price_text, Quantity = quantity_text, UnitPrice = unit_price, Unit = unit, Url = url)
-    # info = {name_text: info}
     print(info)
     return name_text, info
 
@@ -132,9 +128,6 @@ def get_url_instacart(name_produce, store):
     print(link)
     return link
 
-# url = get_url_instacart("pineapple", "adonis")
-# get_info_instacart(url)
-
 
 def instacart_info(ingredients, store):
     '''(list of strings) --> dict
@@ -149,15 +142,3 @@ def instacart_info(ingredients, store):
         instacart.update({name: info})
     
     return instacart
-
-# a = instacart_info(['egg', 'non-fat yogurt', 'baking soda', 'cinnamon', 'raisins', 'banana', 'carrots'], "adonis")
-# print(a)
-
-# #Put soup into a txt file, good for debugging hehe
-# html = soup.prettify()  #soup is your BeautifulSoup object
-# with open("out.txt","w") as out:
-#     for i in range(0, len(html)):
-#         try:
-#             out.write(html[i])
-#         except Exception:
-#             1+1
