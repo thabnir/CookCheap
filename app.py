@@ -101,6 +101,17 @@ def recipe_for_image_caption():
             return f"Error: {response.status_code} - {response.text}"
 
 
+def remove_duplicate_ingredients(ingredients):
+    unique_values = set()
+    result_list = []
+    for d in ingredients:
+        value = d["original"]
+        if value not in unique_values:
+            unique_values.add(value)
+            result_list.append(d)
+    return result_list
+
+
 @app.route("/recipesbyfood", methods=["POST"])
 def get_recipe_by_food():
     if request.method == "POST":
