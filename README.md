@@ -2,35 +2,29 @@
 ![Welcome to CookCheap!](https://github.com/thabnir/grocget/assets/115143411/1817408f-5320-401e-bc39-7361573ff11e)
 
 **Inspiration**
-
-Inflation is skyrocketing. Life is expensive. Students are poor. Sometimes, the carrots are Metro are cheap. CookCheap helps you minimize the costs of feeding yourself by comparing the prices for each item at different grocery stores. We hope to help people enjoy the pleasures of life, like relishing a delicious meal, without straining their already tight budgets.
+Inflation is skyrocketing. Life is expensive. Students are poor. Sometimes, Metro's got a sweet deal on carrots, but figuring out the best prices for a whole shopping list can be a daunting task. CookCheap emerges as the hero for penny-pinching epicureans, aiming to ease the burden of tight budgets. Our mission is to empower everyone to savor life's pleasures, starting with a scrumptious meal that won't break the bank. 
 
 **What it does**
-
-CookCheap receives a picture of a dish from a user, determines the ingredients present in the dish and returns the grocery store and shopping cart where the ingredients can be bought for the cheapest price.
+CookCheap is your culinary companion on a budget! Whether you're a kitchen maestro with a list of favorite ingredients or just snapped a pic of a mystery dish, CookCheap has your back. We've made sure our AI can decipher your photos, revealing the ingredients like a culinary detective. Then, armed with the shopping savvy of a budget guru, we scrape prices from your favorite grocery stores. CookCheap serves up the delectable results, listing recipes from the thriftiest to the tastiest. Click the magic button, and voilà! You're on your way to the cheapest feast in town, all from the comfort of your kitchen.
 
 **How we built it**
-
-We built a web interface that pulls food recipe and ingredient data from the Spoonacular API. The user can get a recommendation of dishes by: a) providing a list of ingredients, b) providing personal food preference and c) providing an image of a dish from which the food name and recipe ingredients are detected. We then scraped websites of different groceries stores such as Provigo, Adonis, Metro and more to get the price of ingredients. Our app then sums up the prices of a list of ingredients for each store and selects the store with the cheapest prices for the ingredients of a particular dish.
+In the kitchen of innovation, we whipped up CookCheap using a blend of tech delights. We stirred in the Spoonacular API for a dash of recipe inspiration, Logmeal API for that special ingredient detection flair, and seasoned it with the magic of web scraping. Our trusty libraries, including bs4 and Selenium, danced through the aisles of online grocery stores like Provigo, Adonis, Metro, and more, snagging prices for the culinary treasure hunt. The result? A web interface that's both your digital sous-chef and budget-saving sidekick. CookCheap: because eating well shouldn't cost a fortune!
 
 **Challenges we ran into**
-
-Daniel:
-Being my first time working with an API, it took me some time to get used to it and reading through the documentation. Finding the right API calls and dealing with big JSON files to process user data took some time getting used to but I gradually got the hang of it. Connecting Flask with HTML and Javascript is something I have had a bit of experience in, but it took some time finding my footing on this.
-
-One of the biggest challenges we faced as a team is files reverting back to older versions when one team member is pushing code on GitHub. For some of us, it was our first experience using git commands while coding in a team and we faced multiple instances of merge conflicts between files.
-
-A challenge encountered during web scraping is dealing with .csv files which contain the data from the grocery stores.
+Navigating the API was a learning curve for most of us. Mastering API calls, deciphering JSON files, and connecting Flask with HTML and JavaScript demanded perseverance and collaboration.
+As a team, Git became our double-edged sword. Code versions played hopscotch, files reverted to previous states, and the intricacies of Git commands during collaborative coding tested our collective patience. Merge conflicts emerged as a common adversary, requiring diligent resolution through effective communication and collaborative problem-solving.
+Web scraping introduced its own complexities, especially when dealing with CSV files housing grocery store data. Coordinating the extraction and integration of information was quite demanding.
 
 **Accomplishments that we're proud of**
-
-We are proud that we developed an accessible interface to dishes we love.
+Tackling web scraping, a previously unexplored domain, required adaptability. Creating a Flask website seamlessly integrated with Spoonacular and Logmeal APIs highlighted our capacity to build a user-friendly space. Incorporating image processing further added sophistication to the fronted.
+Exploring caching underscored our commitment to optimization, enhancing platform performance and ensuring a smooth user experience. 
 
 **What we learned**
-
-Using real-time data is not as complicated as we may have imagined.
+Our coding journey was a crash course in adaptability, mastering web scraping, and deciphering APIs. Image processing brought new skills in uncovering recipes. Caching taught us optimization for better platform performance, while Git challenges emphasized effective communication. In a nutshell, continuous learning, adaptability, and teamwork define our team's growth.
 
 **What's next for CookCheap**
+The next steps could be to implement a dish recommendation system.
 
+**What's next for CookCheap**
 - [ ] Implement a dish recommendation system.
 
